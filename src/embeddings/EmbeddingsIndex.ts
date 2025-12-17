@@ -61,6 +61,12 @@ export class EmbeddingsIndex {
 	/** Detected/used format description */
 	private formatDescription = "";
 	
+	/** Last loaded file path */
+	private lastFilePath = "";
+	
+	/** Last modification time of the embeddings file */
+	private lastModifiedTime = 0;
+	
 	constructor(app: App) {
 		this.app = app;
 	}
@@ -95,6 +101,38 @@ export class EmbeddingsIndex {
 		this.loaded = false;
 		this.entryCount = 0;
 		this.formatDescription = "";
+		this.lastFilePath = "";
+		this.lastModifiedTime = 0;
+	}
+	
+	/**
+	 * Checks if the embeddings file has been modified since last load.
+	 * 
+	 * @param filePath - Path to the embeddings file
+	 * @returns true if file needs to be reloaded
+	 */
+	async needsReload(filePath: string): Promise<boolean> {
+		if (!this.loaded || filePath !== this.lastFilePath) {
+			return true;
+		}
+		
+		const mtime = await this.getFileModifiedTime(filePath);
+		return mtime > this.lastModifiedTime;
+	}
+	
+	/**
+	 * Gets the modification time of a file.
+	 */
+	private async getFileModifiedTime(filePath: string): Promise<number> {
+		const adapter = this.app.vault.adapter;
+		const normalizedPath = normalizePath(filePath);
+		
+		try {
+			const stat = await adapter.stat(normalizedPath);
+			return stat?.mtime ?? 0;
+		} catch {
+			return 0;
+		}
 	}
 	
 	/**
@@ -112,6 +150,9 @@ export class EmbeddingsIndex {
 	): Promise<void> {
 		// Clear existing index
 		this.clear();
+		
+		// Get file modification time before loading
+		const mtime = await this.getFileModifiedTime(filePath);
 		
 		// Read file content
 		const content = await this.readFile(filePath);
@@ -139,6 +180,8 @@ export class EmbeddingsIndex {
 		// Build index
 		this.buildIndex(result.entries);
 		this.formatDescription = result.formatDescription;
+		this.lastFilePath = filePath;
+		this.lastModifiedTime = mtime;
 		this.loaded = true;
 	}
 	

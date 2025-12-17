@@ -131,23 +131,44 @@ export default class SmartLinkerPlugin extends Plugin {
 	}
 
 	/**
-	 * Updates related links for a specific file.
+	 * Ensures embeddings are loaded and up-to-date.
+	 * Automatically reloads if the embeddings file has been modified.
+	 * 
+	 * @returns true if embeddings are ready, false otherwise
 	 */
-	async updateRelatedLinksForFile(file: TFile): Promise<void> {
-		// Ensure embeddings are loaded
-		if (!this.embeddingsIndex?.isLoaded()) {
-			if (!this.settings.embeddingsPath) {
-				new Notice("Embeddings path not configured. Check plugin settings.");
-				return;
-			}
+	private async ensureEmbeddingsLoaded(): Promise<boolean> {
+		if (!this.settings.embeddingsPath) {
+			new Notice("Embeddings path not configured. Check plugin settings.");
+			return false;
+		}
 
-			new Notice("Loading embeddings...");
+		if (!this.embeddingsIndex) {
+			this.embeddingsIndex = new EmbeddingsIndex(this.app);
+		}
+
+		// Check if we need to reload (file modified or not loaded)
+		const needsReload = await this.embeddingsIndex.needsReload(this.settings.embeddingsPath);
+		
+		if (needsReload) {
 			try {
 				await this.loadEmbeddingsFromSettings();
 			} catch (e) {
 				new Notice(`Failed to load embeddings: ${e}`);
-				return;
+				return false;
 			}
+		}
+
+		return this.embeddingsIndex.isLoaded();
+	}
+
+	/**
+	 * Updates related links for a specific file.
+	 */
+	async updateRelatedLinksForFile(file: TFile): Promise<void> {
+		// Ensure embeddings are loaded and up-to-date
+		const ready = await this.ensureEmbeddingsLoaded();
+		if (!ready) {
+			return;
 		}
 
 		// Get embedding for current file
