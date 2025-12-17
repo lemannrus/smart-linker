@@ -1,0 +1,30 @@
+# Build output
+main.js
+*.js.map
+
+# Dependencies
+node_modules/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+
+# Plugin data (user settings)
+data.json
+
+# Large files
+embeddings_example.json
+

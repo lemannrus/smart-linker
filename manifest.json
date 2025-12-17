@@ -1,0 +1,11 @@
+{
+	"id": "auto-related-links",
+	"name": "Auto Related Links",
+	"version": "0.1.0",
+	"minAppVersion": "1.0.0",
+	"description": "Automatically finds and inserts related notes based on semantic similarity using pre-computed embeddings.",
+	"author": "Your Name",
+	"authorUrl": "",
+	"isDesktopOnly": false
+}
+
