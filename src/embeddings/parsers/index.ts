@@ -28,12 +28,12 @@ export function autoParseEmbeddings(data: unknown): ParseResult | null {
 	for (const parser of PARSERS) {
 		const result = parser.parse(data);
 		if (result !== null) {
-			console.log(`Auto Related Links: Detected format - ${parser.name}`);
+			console.log(`Smart Linker: Detected format - ${parser.name}`);
 			return result;
 		}
 	}
 	
-	console.error("Auto Related Links: Could not auto-detect embeddings format");
+	console.error("Smart Linker: Could not auto-detect embeddings format");
 	return null;
 }
 
@@ -54,7 +54,7 @@ export function parseWithManualMapping(
 	const result = arrayParser.parse(data, config);
 	
 	if (result !== null) {
-		console.log("Auto Related Links: Parsed with manual mapping (array format)");
+		console.log("Smart Linker: Parsed with manual mapping (array format)");
 		return result;
 	}
 	
@@ -63,11 +63,11 @@ export function parseWithManualMapping(
 	const mapResult = mapParser.parse(data);
 	
 	if (mapResult !== null) {
-		console.log("Auto Related Links: Parsed with manual mapping (map format)");
+		console.log("Smart Linker: Parsed with manual mapping (map format)");
 		return mapResult;
 	}
 	
-	console.error("Auto Related Links: Failed to parse with manual mapping");
+	console.error("Smart Linker: Failed to parse with manual mapping");
 	return null;
 }
 

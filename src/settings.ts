@@ -1,10 +1,10 @@
 import { App, PluginSettingTab, Setting } from "obsidian";
-import type AutoRelatedLinksPlugin from "./main";
+import type SmartLinkerPlugin from "./main";
 
 /**
  * Plugin settings interface.
  */
-export interface AutoRelatedLinksSettings {
+export interface SmartLinkerSettings {
 	/** Path to embeddings JSON file (relative to vault or absolute) */
 	embeddingsPath: string;
 	
@@ -39,7 +39,7 @@ export interface AutoRelatedLinksSettings {
 /**
  * Default settings values.
  */
-export const DEFAULT_SETTINGS: AutoRelatedLinksSettings = {
+export const DEFAULT_SETTINGS: SmartLinkerSettings = {
 	embeddingsPath: "",
 	topK: 5,
 	similarityThreshold: 0.75,
@@ -53,12 +53,12 @@ export const DEFAULT_SETTINGS: AutoRelatedLinksSettings = {
 };
 
 /**
- * Settings tab for the Auto Related Links plugin.
+ * Settings tab for the Smart Linker plugin.
  */
-export class AutoRelatedLinksSettingTab extends PluginSettingTab {
-	plugin: AutoRelatedLinksPlugin;
+export class SmartLinkerSettingTab extends PluginSettingTab {
+	plugin: SmartLinkerPlugin;
 
-	constructor(app: App, plugin: AutoRelatedLinksPlugin) {
+	constructor(app: App, plugin: SmartLinkerPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -67,7 +67,7 @@ export class AutoRelatedLinksSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl("h2", { text: "Auto Related Links Settings" });
+		containerEl.createEl("h2", { text: "Smart Linker Settings" });
 
 		// --- Core Settings ---
 		containerEl.createEl("h3", { text: "Core Settings" });

@@ -58,20 +58,20 @@ export class VectorSearchParser implements EmbeddingParser {
 	readonly name = "Vector-search plugin format";
 	
 	parse(data: unknown): ParseResult | null {
-		console.log("Auto Related Links: VectorSearchParser attempting to parse...");
+		console.log("Smart Linker: VectorSearchParser attempting to parse...");
 		
 		// Must be an object (not array)
 		if (typeof data !== "object" || data === null || Array.isArray(data)) {
-			console.log("Auto Related Links: VectorSearchParser - not an object");
+			console.log("Smart Linker: VectorSearchParser - not an object");
 			return null;
 		}
 		
 		const obj = data as Record<string, unknown>;
-		console.log("Auto Related Links: VectorSearchParser - keys:", Object.keys(obj));
+		console.log("Smart Linker: VectorSearchParser - keys:", Object.keys(obj));
 		
 		// Must have "vectors" key with an array
 		if (!("vectors" in obj) || !Array.isArray(obj.vectors)) {
-			console.log("Auto Related Links: VectorSearchParser - no 'vectors' array found");
+			console.log("Smart Linker: VectorSearchParser - no 'vectors' array found");
 			return null;
 		}
 		

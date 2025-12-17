@@ -1,8 +1,8 @@
 import { Notice, Plugin, TFile } from "obsidian";
 import {
-	AutoRelatedLinksSettings,
+	SmartLinkerSettings,
 	DEFAULT_SETTINGS,
-	AutoRelatedLinksSettingTab,
+	SmartLinkerSettingTab,
 } from "./settings";
 import { EmbeddingsIndex } from "./embeddings/EmbeddingsIndex";
 import {
@@ -12,17 +12,17 @@ import {
 } from "./markdown/managedBlock";
 
 /**
- * Auto Related Links - Obsidian plugin for semantic similarity-based related notes.
+ * Smart Linker - Obsidian plugin for semantic similarity-based related notes.
  * 
  * Uses pre-computed embeddings from a JSON file (e.g., from vector-search plugin)
  * to find and insert related note links.
  */
-export default class AutoRelatedLinksPlugin extends Plugin {
-	settings: AutoRelatedLinksSettings = DEFAULT_SETTINGS;
+export default class SmartLinkerPlugin extends Plugin {
+	settings: SmartLinkerSettings = DEFAULT_SETTINGS;
 	embeddingsIndex: EmbeddingsIndex | null = null;
 
 	async onload(): Promise<void> {
-		console.log("Auto Related Links: Loading plugin...");
+		console.log("Smart Linker: Loading plugin...");
 
 		// Load settings
 		await this.loadSettings();
@@ -31,7 +31,7 @@ export default class AutoRelatedLinksPlugin extends Plugin {
 		this.embeddingsIndex = new EmbeddingsIndex(this.app);
 
 		// Add settings tab
-		this.addSettingTab(new AutoRelatedLinksSettingTab(this.app, this));
+		this.addSettingTab(new SmartLinkerSettingTab(this.app, this));
 
 		// Add commands
 		this.addCommand({
@@ -61,11 +61,11 @@ export default class AutoRelatedLinksPlugin extends Plugin {
 			setTimeout(() => this.loadEmbeddingsQuietly(), 1000);
 		}
 
-		console.log("Auto Related Links: Plugin loaded");
+		console.log("Smart Linker: Plugin loaded");
 	}
 
 	onunload(): void {
-		console.log("Auto Related Links: Unloading plugin");
+		console.log("Smart Linker: Unloading plugin");
 		this.embeddingsIndex?.clear();
 	}
 
@@ -91,10 +91,10 @@ export default class AutoRelatedLinksPlugin extends Plugin {
 		try {
 			await this.loadEmbeddingsFromSettings();
 			console.log(
-				`Auto Related Links: Loaded ${this.embeddingsIndex?.getEntryCount()} embeddings on startup`
+				`Smart Linker: Loaded ${this.embeddingsIndex?.getEntryCount()} embeddings on startup`
 			);
 		} catch (e) {
-			console.warn("Auto Related Links: Could not load embeddings on startup:", e);
+			console.warn("Smart Linker: Could not load embeddings on startup:", e);
 		}
 	}
 
@@ -112,7 +112,7 @@ export default class AutoRelatedLinksPlugin extends Plugin {
 			const count = this.embeddingsIndex?.getEntryCount() || 0;
 			new Notice(`Loaded ${count} embeddings`);
 		} catch (e) {
-			console.error("Auto Related Links: Failed to reload embeddings:", e);
+			console.error("Smart Linker: Failed to reload embeddings:", e);
 			new Notice(`Failed to load embeddings: ${e}`);
 		}
 	}

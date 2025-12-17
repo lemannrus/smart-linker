@@ -1,7 +1,7 @@
 {
-	"name": "auto-related-links",
+	"name": "smart-linker",
 	"version": "0.1.0",
-	"description": "Obsidian plugin for automatic related links based on semantic similarity",
+	"description": "Obsidian plugin that finds and inserts semantically related notes using AI embeddings",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
@@ -12,9 +12,11 @@
 	"keywords": [
 		"obsidian",
 		"plugin",
-		"related-links",
+		"smart-linker",
+		"related-notes",
 		"embeddings",
-		"semantic-search"
+		"semantic-search",
+		"ai"
 	],
 	"author": "",
 	"license": "MIT",
