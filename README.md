@@ -131,7 +131,7 @@ MIT License — see [LICENSE](LICENSE) file.
 
 ## Support
 
-- 🐛 [Report bugs](https://github.com/YOUR_USERNAME/smart-linker/issues)
-- 💡 [Request features](https://github.com/YOUR_USERNAME/smart-linker/issues)
+- 🐛 [Report bugs](https://github.com/lemannrus/smart-linker/issues)
+- 💡 [Request features](https://github.com/lemannrus/smart-linker/issues)
 - ⭐ Star on GitHub if you find it useful!
 
