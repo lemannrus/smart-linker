@@ -25,6 +25,3 @@ npm-debug.log*
 # Plugin data (user settings)
 data.json
 
-# Large files
-embeddings_example.json
-

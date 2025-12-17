@@ -1,11 +1,12 @@
 {
-	"id": "auto-related-links",
-	"name": "Auto Related Links",
+	"id": "smart-linker",
+	"name": "Smart Linker",
 	"version": "0.1.0",
 	"minAppVersion": "1.0.0",
-	"description": "Automatically finds and inserts related notes based on semantic similarity using pre-computed embeddings.",
+	"description": "Automatically finds and inserts semantically related notes using AI embeddings from Vector Search plugin.",
 	"author": "Your Name",
-	"authorUrl": "",
+	"authorUrl": "https://github.com/YOUR_USERNAME",
+	"fundingUrl": "",
 	"isDesktopOnly": false
 }
 
