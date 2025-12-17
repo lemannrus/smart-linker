@@ -1,6 +1,6 @@
 {
 	"name": "smart-linker",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "Obsidian plugin that finds and inserts semantically related notes using AI embeddings",
 	"main": "main.js",
 	"scripts": {
@@ -32,4 +32,3 @@
 		"typescript": "^5.3.3"
 	}
 }
-
