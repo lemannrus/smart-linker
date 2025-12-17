@@ -45,53 +45,53 @@ interface IndexEntry {
  */
 export class EmbeddingsIndex {
 	private app: App;
-	
+
 	/** Path -> normalized vector mapping for fast lookup */
 	private pathIndex: Map<string, Float32Array> = new Map();
-	
+
 	/** All entries for iteration during search */
 	private entries: IndexEntry[] = [];
-	
+
 	/** Whether the index has been loaded */
 	private loaded = false;
-	
+
 	/** Number of entries loaded */
 	private entryCount = 0;
-	
+
 	/** Detected/used format description */
 	private formatDescription = "";
-	
+
 	/** Last loaded file path */
 	private lastFilePath = "";
-	
+
 	/** Last modification time of the embeddings file */
 	private lastModifiedTime = 0;
-	
+
 	constructor(app: App) {
 		this.app = app;
 	}
-	
+
 	/**
 	 * Returns whether the index has been loaded.
 	 */
 	isLoaded(): boolean {
 		return this.loaded;
 	}
-	
+
 	/**
 	 * Returns the number of entries in the index.
 	 */
 	getEntryCount(): number {
 		return this.entryCount;
 	}
-	
+
 	/**
 	 * Returns the format description of the loaded file.
 	 */
 	getFormatDescription(): string {
 		return this.formatDescription;
 	}
-	
+
 	/**
 	 * Clears the index.
 	 */
@@ -104,7 +104,7 @@ export class EmbeddingsIndex {
 		this.lastFilePath = "";
 		this.lastModifiedTime = 0;
 	}
-	
+
 	/**
 	 * Checks if the embeddings file has been modified since last load.
 	 * 
@@ -134,7 +134,7 @@ export class EmbeddingsIndex {
 			return 0;
 		}
 	}
-	
+
 	/**
 	 * Loads embeddings from a JSON file.
 	 * 
@@ -150,16 +150,16 @@ export class EmbeddingsIndex {
 	): Promise<void> {
 		// Clear existing index
 		this.clear();
-		
+
 		// Get file modification time before loading
 		const mtime = await this.getFileModifiedTime(filePath);
-		
+
 		// Read file content
 		const content = await this.readFile(filePath);
 		if (content === null) {
 			throw new Error(`Embeddings file not found: ${filePath}`);
 		}
-		
+
 		// Parse JSON
 		let data: unknown;
 		try {
@@ -167,16 +167,16 @@ export class EmbeddingsIndex {
 		} catch (e) {
 			throw new Error(`Invalid JSON in embeddings file: ${e}`);
 		}
-		
+
 		// Parse using appropriate method
 		const result = mode === "auto"
 			? autoParseEmbeddings(data)
 			: parseWithManualMapping(data, manualConfig || { pathKey: "path", embeddingKey: "embedding" });
-		
+
 		if (result === null) {
 			throw new Error("Could not parse embeddings file. Check format or use manual mapping.");
 		}
-		
+
 		// Build index
 		this.buildIndex(result.entries);
 		this.formatDescription = result.formatDescription;
@@ -184,7 +184,7 @@ export class EmbeddingsIndex {
 		this.lastModifiedTime = mtime;
 		this.loaded = true;
 	}
-	
+
 	/**
 	 * Reads file content from vault or filesystem.
 	 */
@@ -192,7 +192,7 @@ export class EmbeddingsIndex {
 		const vault = this.app.vault;
 		const adapter = vault.adapter;
 		const normalizedPath = normalizePath(filePath);
-		
+
 		// For .obsidian paths, use adapter directly (vault doesn't index .obsidian)
 		if (normalizedPath.startsWith(".obsidian")) {
 			try {
@@ -205,13 +205,13 @@ export class EmbeddingsIndex {
 			}
 			return null;
 		}
-		
+
 		// Try as vault-relative path first (for regular vault files)
 		const abstractFile = vault.getAbstractFileByPath(normalizedPath);
 		if (abstractFile instanceof TFile) {
 			return await vault.read(abstractFile);
 		}
-		
+
 		// Try reading via adapter (for paths outside normal vault structure)
 		try {
 			// Check if path is absolute
@@ -221,7 +221,7 @@ export class EmbeddingsIndex {
 					return await adapter.read(filePath);
 				}
 			}
-			
+
 			// Try relative to vault root
 			const exists = await adapter.exists(normalizedPath);
 			if (exists) {
@@ -230,10 +230,10 @@ export class EmbeddingsIndex {
 		} catch {
 			// Failed to read file
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Builds the internal index from parsed entries.
 	 */
@@ -241,32 +241,32 @@ export class EmbeddingsIndex {
 		for (const entry of entries) {
 			// Normalize vector for fast similarity computation
 			const normalizedVec = normalizeVector(entry.vector);
-			
+
 			// Store in path index (try multiple path variants)
 			this.addPathVariants(entry.path, normalizedVec);
-			
+
 			// Store in entries list
 			this.entries.push({
 				path: entry.path,
 				normalizedVector: normalizedVec,
 			});
 		}
-		
+
 		this.entryCount = entries.length;
 	}
-	
+
 	/**
 	 * Adds path variants to the index for flexible lookup.
 	 */
 	private addPathVariants(path: string, vector: Float32Array): void {
 		// Original path
 		this.pathIndex.set(path, vector);
-		
+
 		// Without .md extension
 		if (path.endsWith(".md")) {
 			this.pathIndex.set(path.slice(0, -3), vector);
 		}
-		
+
 		// Lowercase version
 		const lowerPath = path.toLowerCase();
 		if (lowerPath !== path) {
@@ -276,7 +276,7 @@ export class EmbeddingsIndex {
 			}
 		}
 	}
-	
+
 	/**
 	 * Gets the embedding vector for a file.
 	 * Tries multiple path formats for flexible matching.
@@ -288,41 +288,41 @@ export class EmbeddingsIndex {
 		// Try exact match first
 		let vector = this.pathIndex.get(filePath);
 		if (vector) return vector;
-		
+
 		// Normalize path (replace backslashes)
 		const normalized = filePath.replace(/\\/g, "/");
 		vector = this.pathIndex.get(normalized);
 		if (vector) return vector;
-		
+
 		// Try without .md extension
 		if (normalized.endsWith(".md")) {
 			vector = this.pathIndex.get(normalized.slice(0, -3));
 			if (vector) return vector;
 		}
-		
+
 		// Try lowercase
 		const lower = normalized.toLowerCase();
 		vector = this.pathIndex.get(lower);
 		if (vector) return vector;
-		
+
 		if (lower.endsWith(".md")) {
 			vector = this.pathIndex.get(lower.slice(0, -3));
 			if (vector) return vector;
 		}
-		
+
 		// Try basename only
 		const basename = this.getBasename(normalized);
 		vector = this.pathIndex.get(basename);
 		if (vector) return vector;
-		
+
 		if (basename.endsWith(".md")) {
 			vector = this.pathIndex.get(basename.slice(0, -3));
 			if (vector) return vector;
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Finds the nearest neighbors to a given vector.
 	 * 
@@ -334,39 +334,39 @@ export class EmbeddingsIndex {
 		if (!this.loaded) {
 			return [];
 		}
-		
+
 		const { k, threshold, excludePaths = [], excludeFolders = [] } = options;
-		
+
 		// Normalize query vector
 		const normalizedQuery = normalizeVector(queryVector);
-		
+
 		// Convert exclude sets for faster lookup
 		const excludePathSet = new Set(excludePaths.map((p) => this.normalizePath(p)));
-		
+
 		// Compute similarities
 		const results: NearestResult[] = [];
-		
+
 		for (const entry of this.entries) {
 			// Check exclusions
 			const normalizedEntryPath = this.normalizePath(entry.path);
-			
+
 			if (excludePathSet.has(normalizedEntryPath)) {
 				continue;
 			}
-			
+
 			// Check folder exclusions
 			if (this.isInExcludedFolder(entry.path, excludeFolders)) {
 				continue;
 			}
-			
+
 			// Compute similarity (dot product of normalized vectors)
 			const score = cosineSimilarityNormalized(normalizedQuery, entry.normalizedVector);
-			
+
 			if (score >= threshold) {
 				results.push({ path: entry.path, score });
 			}
 		}
-		
+
 		// Deduplicate by path - keep highest score for each file
 		const bestByPath = new Map<string, NearestResult>();
 		for (const result of results) {
@@ -376,24 +376,24 @@ export class EmbeddingsIndex {
 				bestByPath.set(normalizedPath, result);
 			}
 		}
-		
+
 		// Convert back to array and sort by score descending
 		const deduplicated = Array.from(bestByPath.values());
 		deduplicated.sort((a, b) => b.score - a.score);
-		
+
 		// Return top K
 		return deduplicated.slice(0, k);
 	}
-	
+
 	/**
 	 * Checks if a path is in an excluded folder.
 	 */
 	private isInExcludedFolder(path: string, excludeFolders: string[]): boolean {
 		const normalizedPath = this.normalizePath(path).toLowerCase();
-		
+
 		for (const folder of excludeFolders) {
 			const normalizedFolder = folder.replace(/\\/g, "/").toLowerCase();
-			
+
 			// Check if path starts with folder (considering folder boundaries)
 			if (
 				normalizedPath.startsWith(normalizedFolder + "/") ||
@@ -402,17 +402,17 @@ export class EmbeddingsIndex {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Normalizes a path for comparison.
 	 */
 	private normalizePath(path: string): string {
 		return path.replace(/\\/g, "/").toLowerCase();
 	}
-	
+
 	/**
 	 * Gets basename from a path.
 	 */
