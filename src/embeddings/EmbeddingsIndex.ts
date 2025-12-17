@@ -123,37 +123,22 @@ export class EmbeddingsIndex {
 		let data: unknown;
 		try {
 			data = JSON.parse(content);
-			console.log(`Smart Linker: JSON parsed successfully, type: ${typeof data}, isArray: ${Array.isArray(data)}`);
-			if (typeof data === "object" && data !== null && !Array.isArray(data)) {
-				console.log(`Smart Linker: Object keys: ${Object.keys(data as Record<string, unknown>).join(", ")}`);
-			}
 		} catch (e) {
 			throw new Error(`Invalid JSON in embeddings file: ${e}`);
 		}
 		
 		// Parse using appropriate method
-		console.log(`Smart Linker: Parsing with mode: ${mode}`);
 		const result = mode === "auto"
 			? autoParseEmbeddings(data)
 			: parseWithManualMapping(data, manualConfig || { pathKey: "path", embeddingKey: "embedding" });
 		
 		if (result === null) {
-			console.error("Smart Linker: All parsers failed to recognize the format");
 			throw new Error("Could not parse embeddings file. Check format or use manual mapping.");
 		}
-		
-		console.log(`Smart Linker: Parse result - ${result.entries.length} entries, format: ${result.formatDescription}`);
 		
 		// Build index
 		this.buildIndex(result.entries);
 		this.formatDescription = result.formatDescription;
-		
-		console.log(`Smart Linker: Loaded ${this.entryCount} embeddings (${result.errorCount} errors)`);
-		
-		if (result.errorCount > 0) {
-			console.warn(`Smart Linker: ${result.errorCount} entries failed to parse`);
-		}
-		
 		this.loaded = true;
 	}
 	
@@ -165,21 +150,15 @@ export class EmbeddingsIndex {
 		const adapter = vault.adapter;
 		const normalizedPath = normalizePath(filePath);
 		
-		console.log(`Smart Linker: Attempting to read file: ${filePath}`);
-		console.log(`Smart Linker: Normalized path: ${normalizedPath}`);
-		
 		// For .obsidian paths, use adapter directly (vault doesn't index .obsidian)
 		if (normalizedPath.startsWith(".obsidian")) {
 			try {
 				const exists = await adapter.exists(normalizedPath);
-				console.log(`Smart Linker: File exists (adapter): ${exists}`);
 				if (exists) {
-					const content = await adapter.read(normalizedPath);
-					console.log(`Smart Linker: Read ${content.length} bytes via adapter`);
-					return content;
+					return await adapter.read(normalizedPath);
 				}
-			} catch (e) {
-				console.error("Smart Linker: Error reading .obsidian file:", e);
+			} catch {
+				// Failed to read from .obsidian
 			}
 			return null;
 		}
@@ -187,7 +166,6 @@ export class EmbeddingsIndex {
 		// Try as vault-relative path first (for regular vault files)
 		const abstractFile = vault.getAbstractFileByPath(normalizedPath);
 		if (abstractFile instanceof TFile) {
-			console.log(`Smart Linker: Found file in vault: ${abstractFile.path}`);
 			return await vault.read(abstractFile);
 		}
 		
@@ -196,7 +174,6 @@ export class EmbeddingsIndex {
 			// Check if path is absolute
 			if (filePath.startsWith("/") || filePath.match(/^[A-Za-z]:/)) {
 				const exists = await adapter.exists(filePath);
-				console.log(`Smart Linker: Absolute path exists: ${exists}`);
 				if (exists) {
 					return await adapter.read(filePath);
 				}
@@ -204,15 +181,13 @@ export class EmbeddingsIndex {
 			
 			// Try relative to vault root
 			const exists = await adapter.exists(normalizedPath);
-			console.log(`Smart Linker: Relative path exists: ${exists}`);
 			if (exists) {
 				return await adapter.read(normalizedPath);
 			}
-		} catch (e) {
-			console.error("Smart Linker: Error reading file:", e);
+		} catch {
+			// Failed to read file
 		}
 		
-		console.error(`Smart Linker: File not found: ${filePath}`);
 		return null;
 	}
 	
@@ -314,7 +289,6 @@ export class EmbeddingsIndex {
 	 */
 	findNearest(queryVector: Float32Array, options: FindNearestOptions): NearestResult[] {
 		if (!this.loaded) {
-			console.warn("Smart Linker: Index not loaded");
 			return [];
 		}
 		

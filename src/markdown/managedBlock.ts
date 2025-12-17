@@ -124,7 +124,7 @@ export function findManagedBlock(
 	const endIndex = content.indexOf(BLOCK_END_MARKER, startIndex);
 	if (endIndex === -1) {
 		// Start marker found but no end marker - malformed block
-		console.warn("Smart Linker: Found start marker but no end marker");
+		// Start marker found but no end marker - malformed block
 		return null;
 	}
 	

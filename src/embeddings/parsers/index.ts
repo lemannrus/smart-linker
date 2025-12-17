@@ -28,12 +28,10 @@ export function autoParseEmbeddings(data: unknown): ParseResult | null {
 	for (const parser of PARSERS) {
 		const result = parser.parse(data);
 		if (result !== null) {
-			console.log(`Smart Linker: Detected format - ${parser.name}`);
 			return result;
 		}
 	}
 	
-	console.error("Smart Linker: Could not auto-detect embeddings format");
 	return null;
 }
 
@@ -54,7 +52,6 @@ export function parseWithManualMapping(
 	const result = arrayParser.parse(data, config);
 	
 	if (result !== null) {
-		console.log("Smart Linker: Parsed with manual mapping (array format)");
 		return result;
 	}
 	
@@ -63,11 +60,9 @@ export function parseWithManualMapping(
 	const mapResult = mapParser.parse(data);
 	
 	if (mapResult !== null) {
-		console.log("Smart Linker: Parsed with manual mapping (map format)");
 		return mapResult;
 	}
 	
-	console.error("Smart Linker: Failed to parse with manual mapping");
 	return null;
 }
 

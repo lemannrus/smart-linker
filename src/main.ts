@@ -22,8 +22,6 @@ export default class SmartLinkerPlugin extends Plugin {
 	embeddingsIndex: EmbeddingsIndex | null = null;
 
 	async onload(): Promise<void> {
-		console.log("Smart Linker: Loading plugin...");
-
 		// Load settings
 		await this.loadSettings();
 
@@ -60,12 +58,9 @@ export default class SmartLinkerPlugin extends Plugin {
 			// Use setTimeout to not block plugin loading
 			setTimeout(() => this.loadEmbeddingsQuietly(), 1000);
 		}
-
-		console.log("Smart Linker: Plugin loaded");
 	}
 
 	onunload(): void {
-		console.log("Smart Linker: Unloading plugin");
 		this.embeddingsIndex?.clear();
 	}
 
@@ -90,11 +85,8 @@ export default class SmartLinkerPlugin extends Plugin {
 	private async loadEmbeddingsQuietly(): Promise<void> {
 		try {
 			await this.loadEmbeddingsFromSettings();
-			console.log(
-				`Smart Linker: Loaded ${this.embeddingsIndex?.getEntryCount()} embeddings on startup`
-			);
-		} catch (e) {
-			console.warn("Smart Linker: Could not load embeddings on startup:", e);
+		} catch {
+			// Silently fail on startup - user can manually reload
 		}
 	}
 
@@ -112,7 +104,6 @@ export default class SmartLinkerPlugin extends Plugin {
 			const count = this.embeddingsIndex?.getEntryCount() || 0;
 			new Notice(`Loaded ${count} embeddings`);
 		} catch (e) {
-			console.error("Smart Linker: Failed to reload embeddings:", e);
 			new Notice(`Failed to load embeddings: ${e}`);
 		}
 	}
