@@ -115,18 +115,18 @@ export class EmbeddingsIndex {
 		if (!this.loaded || filePath !== this.lastFilePath) {
 			return true;
 		}
-		
+
 		const mtime = await this.getFileModifiedTime(filePath);
 		return mtime > this.lastModifiedTime;
 	}
-	
+
 	/**
 	 * Gets the modification time of a file.
 	 */
 	private async getFileModifiedTime(filePath: string): Promise<number> {
 		const adapter = this.app.vault.adapter;
 		const normalizedPath = normalizePath(filePath);
-		
+
 		try {
 			const stat = await adapter.stat(normalizedPath);
 			return stat?.mtime ?? 0;
