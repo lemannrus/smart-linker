@@ -180,19 +180,29 @@ export default class SmartLinkerPlugin extends Plugin {
 			return;
 		}
 
-		// Find related notes
+		// Find related notes (request more than needed to account for deleted files)
 		const results = this.embeddingsIndex!.findNearest(currentVector, {
-			k: this.settings.topK,
+			k: this.settings.topK * 2,
 			threshold: this.settings.similarityThreshold,
 			excludePaths: [file.path],
 			excludeFolders: this.settings.excludedFolders,
 		});
 
-		// Convert to RelatedNote format
-		const relatedNotes: RelatedNote[] = results.map((r) => ({
-			path: this.ensureMdExtension(r.path),
-			score: r.score,
-		}));
+		// Filter out non-existent files and convert to RelatedNote format
+		const relatedNotes: RelatedNote[] = [];
+		for (const r of results) {
+			const notePath = this.ensureMdExtension(r.path);
+			
+			// Check if file exists in vault
+			if (this.fileExists(notePath)) {
+				relatedNotes.push({ path: notePath, score: r.score });
+				
+				// Stop if we have enough
+				if (relatedNotes.length >= this.settings.topK) {
+					break;
+				}
+			}
+		}
 
 		// Generate managed block
 		const newBlock = generateManagedBlock(relatedNotes, {
@@ -227,6 +237,14 @@ export default class SmartLinkerPlugin extends Plugin {
 			return path + ".md";
 		}
 		return path;
+	}
+
+	/**
+	 * Checks if a file exists in the vault.
+	 */
+	private fileExists(path: string): boolean {
+		const file = this.app.vault.getAbstractFileByPath(path);
+		return file instanceof TFile;
 	}
 }
 
