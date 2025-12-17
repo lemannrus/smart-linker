@@ -43,7 +43,7 @@ export const DEFAULT_SETTINGS: SmartLinkerSettings = {
 	embeddingsPath: "",
 	topK: 5,
 	similarityThreshold: 0.75,
-	excludedFolders: [".obsidian", "Templates", "Daily"],
+	excludedFolders: ["Templates", "Daily"],
 	blockHeading: "## Related",
 	usePathLinks: true,
 	showSimilarityScore: false,
@@ -67,10 +67,14 @@ export class SmartLinkerSettingTab extends PluginSettingTab {
 		const { containerEl } = this;
 		containerEl.empty();
 
-		containerEl.createEl("h2", { text: "Smart Linker Settings" });
+		new Setting(containerEl)
+			.setHeading()
+			.setName("Smart linker settings");
 
 		// --- Core Settings ---
-		containerEl.createEl("h3", { text: "Core Settings" });
+		new Setting(containerEl)
+			.setHeading()
+			.setName("Core settings");
 
 		new Setting(containerEl)
 			.setName("Embeddings JSON path")
@@ -116,9 +120,10 @@ export class SmartLinkerSettingTab extends PluginSettingTab {
 		new Setting(containerEl)
 			.setName("Excluded folders")
 			.setDesc("Folders to exclude from results (one per line)")
-			.addTextArea((text) =>
+			.addTextArea((text) => {
+				const configDir = this.app.vault.configDir;
 				text
-					.setPlaceholder(".obsidian\nTemplates\nDaily")
+					.setPlaceholder(`${configDir}\nTemplates\nDaily`)
 					.setValue(this.plugin.settings.excludedFolders.join("\n"))
 					.onChange(async (value) => {
 						this.plugin.settings.excludedFolders = value
@@ -126,11 +131,13 @@ export class SmartLinkerSettingTab extends PluginSettingTab {
 							.map((f) => f.trim())
 							.filter((f) => f.length > 0);
 						await this.plugin.saveSettings();
-					})
-			);
+					});
+			});
 
 		// --- Display Settings ---
-		containerEl.createEl("h3", { text: "Display Settings" });
+		new Setting(containerEl)
+			.setHeading()
+			.setName("Display settings");
 
 		new Setting(containerEl)
 			.setName("Block heading")
@@ -170,7 +177,9 @@ export class SmartLinkerSettingTab extends PluginSettingTab {
 			);
 
 		// --- JSON Format Settings ---
-		containerEl.createEl("h3", { text: "JSON Format Settings" });
+		new Setting(containerEl)
+			.setHeading()
+			.setName("JSON format settings");
 
 		new Setting(containerEl)
 			.setName("JSON format detection")

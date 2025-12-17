@@ -193,8 +193,9 @@ export class EmbeddingsIndex {
 		const adapter = vault.adapter;
 		const normalizedPath = normalizePath(filePath);
 
-		// For .obsidian paths, use adapter directly (vault doesn't index .obsidian)
-		if (normalizedPath.startsWith(".obsidian")) {
+		// For config directory paths, use adapter directly (vault doesn't index config dir)
+		const configDir = this.app.vault.configDir;
+		if (normalizedPath.startsWith(configDir)) {
 			try {
 				const exists = await adapter.exists(normalizedPath);
 				if (exists) {

@@ -56,7 +56,9 @@ export default class SmartLinkerPlugin extends Plugin {
 		// Try to load embeddings on startup if path is configured
 		if (this.settings.embeddingsPath) {
 			// Use setTimeout to not block plugin loading
-			setTimeout(() => this.loadEmbeddingsQuietly(), 1000);
+			setTimeout(() => {
+				void this.loadEmbeddingsQuietly();
+			}, 1000);
 		}
 	}
 
